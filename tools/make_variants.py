@@ -7,15 +7,22 @@ community themes included, not just ours.
     python3 tools/make_variants.py              # write themes/<name>-light.css / -dark.css
     python3 tools/make_variants.py --dry-run    # report only
     python3 tools/make_variants.py nord dracula # just these sources
+    python3 tools/make_variants.py --check      # exit 1 if a theme has no twin
 
-Needs numpy + scipy (the spinner filter comes from css_filter_solver.py, per
-CLAUDE.md), so run it with the same interpreter as that tool.
+Every theme ships with its twin: run it for each new theme. The theme picker's
+host-side worker runs it for every theme saved in the editor.
+
+The spinner filter comes from css_filter_solver.py (numpy + scipy) when those
+import, else from spinner_spsa.py, a standard-library port of the picker
+editor's solver; the header of each variant names the one used.
 
 Sources: our themes/*.css (except generated variants), plus theme.park's own
 from a theme.park css/ directory holding {theme-options,community-theme-options}
 (--upstream, or $THEME_PARK_CSS; a clone of themepark-dev/theme.park works).
-Without one, only this repo's themes get variants. A variant is skipped when a real theme already has its name --
-gruvbox-light exists, so gruvbox gets no generated one.
+Without one, only this repo's themes get variants. A variant is skipped when a
+real opposite-mode twin exists (see counterparts()): gruvbox-light exists, so
+gruvbox gets no generated one, and github-dark-high-contrast pairs with
+github-light-high-contrast.
 
 How colours move, per role (every theme uses the same ~22 variables):
   surfaces  page, panels, headers, menus, the overseerr gradient: lightness
@@ -385,6 +392,20 @@ def build(src_name, css, target):
     return decls, new, fmt(button, 1.0)
 
 
+def counterparts(name):
+    """Names that would be `name`'s opposite-mode twin: "dark"/"light" swapped
+    at one position, a trailing one dropped, or one appended. The theme
+    picker's themes.mode_counterparts() is the same rule -- keep them alike."""
+    toks = name.split("-")
+    out = []
+    for i, tok in enumerate(toks):
+        if tok in ("dark", "light"):
+            out.append("-".join(toks[:i] + ["light" if tok == "dark" else "dark"] + toks[i + 1:]))
+            if i == len(toks) - 1 and i:
+                out.append("-".join(toks[:i]))
+    return out + [f"{name}-light", f"{name}-dark"]
+
+
 def title_of(name, css):
     m = re.search(r"theme\.park custom theme:\s*(.+)", css)
     if m:
@@ -392,7 +413,7 @@ def title_of(name, css):
     return " ".join(w.capitalize() for w in name.split("-"))
 
 
-def render(src_name, kind, css, target, decls, new, spinner, button_hex):
+def render(src_name, kind, css, target, decls, new, spinner, button_hex, solver):
     title = title_of(src_name, css)
     lines = [f"  {var}: {new[var] if var != '--petio-spinner' else spinner};" for var, _ in decls]
     origin = {"official": "theme.park's official theme", "community": "theme.park's community theme",
@@ -405,15 +426,30 @@ def render(src_name, kind, css, target, decls, new, spinner, button_hex):
             f" * contrast needs (text 7:1, muted and links 4.5:1, UI 3:1 on every panel).\n *\n"
             f" * --accent-color and --gitea-color-primary-dark-4 are bare \"R, G, B\" on\n"
             f" * purpose: theme.park's base CSS wraps them in rgb()/rgba() itself.\n"
-            f" * --petio-spinner computed with tools/css_filter_solver.py '{button_hex}'.\n */\n"
+            f" * --petio-spinner computed with tools/{solver} '{button_hex}'.\n */\n"
             ":root {\n" + "\n".join(lines) + "\n}\n")
 
 
 def _solve(hexcol):
     os.environ.setdefault("OMP_NUM_THREADS", "1")
-    from css_filter_solver import format_filter, solve
+    try:
+        from css_filter_solver import format_filter, solve
+    except ImportError:                                 # no numpy/scipy: the stdlib port
+        from spinner_spsa import solve_filter
+        return hexcol, solve_filter(hexcol), "spinner_spsa.py"
     params, _err, _t = solve(hexcol.lstrip("#"))
-    return hexcol, format_filter(params)
+    return hexcol, format_filter(params), "css_filter_solver.py"
+
+
+def write_atomic(path, text):
+    """Temp file + rename: themes/ can sit in a directory another process can
+    write (the theme picker's container), and write_text() would follow a
+    symlink planted at the variant's name."""
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    with os.fdopen(fd, "w") as f:
+        f.write(text)
+    os.replace(tmp, path)
 
 
 def sources(upstream):
@@ -438,6 +474,8 @@ def main():
     ap.add_argument("--upstream", type=Path, default=os.environ.get("THEME_PARK_CSS") or None,
                     help="theme.park css/ directory (default: $THEME_PARK_CSS)")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--check", action="store_true",
+                    help="write nothing; exit 1 if a theme has no twin file")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) // 2))
     args = ap.parse_args()
 
@@ -457,17 +495,11 @@ def main():
             continue
         target = "dark" if mode == "light" else "light"
         vname = f"{name}-{target}"
-        if vname in real:
-            skipped.append((name, f"a real '{vname}' already exists"))
+        twin = next((t for t in counterparts(name)
+                     if t in real and mode_of(declarations(srcs[t][1])) == target), None)
+        if twin:
+            skipped.append((name, f"its real {target} twin '{twin}' exists"))
             continue
-        # ...and the other way round: gruvbox-light's dark twin is gruvbox,
-        # ayu-dark's light twin is ayu-light.
-        stem, _, suffix = name.rpartition("-")
-        if suffix in ("light", "dark") and suffix != target:
-            twin = next((t for t in (stem, f"{stem}-{target}") if t in real), None)
-            if twin:
-                skipped.append((name, f"its real {target} twin '{twin}' exists"))
-                continue
         plan.append((name, kind, css, target, vname))
 
     built = []
@@ -478,6 +510,22 @@ def main():
             skipped.append((name, str(e)))
             continue
         built.append((name, kind, css, target, vname, decls, new, button_hex))
+    if args.check:
+        missing = [(b[4], b[0]) for b in built if not (REPO / "themes" / f"{b[4]}.css").exists()]
+        for vname, name in missing:
+            print(f"  missing {vname}  (twin of '{name}')")
+        # A generated twin nothing would generate any more: its source gained a
+        # real twin, or (with the upstream themes to hand) is gone.
+        wanted = {(b[0], b[4]) for b in built}
+        stale = []
+        for p in sorted((REPO / "themes").glob("*.css")):
+            m = re.search(re.escape(MARK) + r" \w+ of '([^']+)'", p.read_text()[:1200])
+            if m and (m.group(1), p.stem) not in wanted and (m.group(1) in srcs or args.upstream):
+                stale.append(p.stem)
+                print(f"  stale {p.stem}  (no longer generated from '{m.group(1)}': delete it)")
+        print(f"{len(built) - len(missing)} of {len(built)} twins present, {len(stale)} stale"
+              + (". Run: python3 tools/make_variants.py " + " ".join(n for _, n in missing) if missing else "."))
+        sys.exit(1 if missing or stale else 0)
     print(f"{len(built)} variant(s) to write, {len(skipped)} skipped:")
     for n, why in skipped:
         print(f"  skip {n}: {why}")
@@ -490,10 +538,12 @@ def main():
     print(f"Solving {len(colours)} spinner filter(s) with {args.workers} worker(s)...", flush=True)
     sys.path.insert(0, str(HERE))
     with ProcessPoolExecutor(max_workers=args.workers) as ex:
-        spinners = dict(ex.map(_solve, colours))
+        spinners = {h: (f, tool) for h, f, tool in ex.map(_solve, colours)}
     for name, kind, css, target, vname, decls, new, button_hex in built:
-        text = render(name, kind, css, target, decls, new, spinners[button_hex], button_hex)
-        (REPO / "themes" / f"{vname}.css").write_text(text)
+        spinner, tool = spinners[button_hex]
+        text = render(name, kind, css, target, decls, new, spinner, button_hex, tool)
+        write_atomic(REPO / "themes" / f"{vname}.css", text)
+        print(f"  wrote {vname}")
     print(f"Wrote {len(built)} file(s) to themes/. Next: python3 build_previews.py")
 
 

@@ -1,7 +1,8 @@
 # Theme Park Themes
 
-100 custom themes for [theme.park](https://theme-park.dev), plus 123
-generated light/dark twins (theme.park's own themes included). Each
+126 custom themes for [theme.park](https://theme-park.dev), plus 141
+generated light/dark twins (theme.park's own themes included): every theme
+comes in both a light and a dark form. Each
 hand-made theme is a faithful port of a published colour scheme, such as
 Tokyo Night, Gruvbox, Kanagawa, Everforest, Solarized, Night Owl, Monokai,
 GitHub or Ayu, onto theme.park's variables, with contrast checked rather
@@ -43,7 +44,8 @@ every theme.
 | `previews/` | Generated mock-UI preview pages (`python3 build_previews.py`). |
 | `build_previews.py` | Regenerates `previews/`. Discovers `themes/*.css`; there's no list to maintain. |
 | `tools/css_filter_solver.py` | Computes the `--petio-spinner` CSS filter for a hex colour (numpy + scipy). |
-| `tools/make_variants.py` | Generates the opposite-mode twin of every theme (`<name>-light.css` / `-dark.css`). Point it at a theme.park `css/` directory with `--upstream` or `$THEME_PARK_CSS` to include theme.park's own themes. |
+| `tools/make_variants.py` | Generates the opposite-mode twin of every theme (`<name>-light.css` / `-dark.css`); `--check` exits 1 if any theme lacks one. Point it at a theme.park `css/` directory with `--upstream` or `$THEME_PARK_CSS` to include theme.park's own themes. |
+| `tools/spinner_spsa.py` | Standard-library spinner solver, used by `make_variants.py` when numpy and scipy aren't installed. |
 
 ## Adding a theme
 
@@ -56,7 +58,10 @@ every theme.
 3. Don't guess `--petio-spinner`: run
    `python3 tools/css_filter_solver.py '#rrggbb'` with your button colour.
 4. Keep every declaration on one line.
-5. `python3 build_previews.py`, then open `previews/index.html`.
+5. Generate its twin: `python3 tools/make_variants.py <name>`. Every theme
+   ships in both modes; `python3 tools/make_variants.py --check` confirms
+   none is missing.
+6. `python3 build_previews.py`, then open `previews/index.html`.
 
 ## Credits
 
