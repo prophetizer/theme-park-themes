@@ -1,6 +1,6 @@
 # Theme Park Themes
 
-126 custom themes for [theme.park](https://theme-park.dev), plus 141
+153 custom themes for [theme.park](https://theme-park.dev), plus 156
 generated light/dark twins (theme.park's own themes included): every theme
 comes in both a light and a dark form. Each
 hand-made theme is a faithful port of a published colour scheme, such as
@@ -45,6 +45,8 @@ every theme.
 | `build_previews.py` | Regenerates `previews/`. Discovers `themes/*.css`; there's no list to maintain. |
 | `tools/css_filter_solver.py` | Computes the `--petio-spinner` CSS filter for a hex colour (numpy + scipy). |
 | `tools/make_variants.py` | Generates the opposite-mode twin of every theme (`<name>-light.css` / `-dark.css`); `--check` exits 1 if any theme lacks one. Point it at a theme.park `css/` directory with `--upstream` or `$THEME_PARK_CSS` to include theme.park's own themes. |
+| `tools/port_palette.py` | Writes themes from published palettes (a JSON list of palettes and role choices), moving only lightness where contrast needs it and listing each move in the header. |
+| `tools/gradient_theme.py` | Writes gradient themes from [uiGradients](https://github.com/Ghosh/uiGradients) (MIT): the gradient on the page, a veil on panels for 7:1 text. |
 | `tools/spinner_spsa.py` | Standard-library spinner solver, used by `make_variants.py` when numpy and scipy aren't installed. |
 
 ## Adding a theme
