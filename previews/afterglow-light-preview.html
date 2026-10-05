@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Afterglow (light) — theme.park preview</title>
+<style>
+  :root {
+    --main-bg-color: #f3f3f3;
+    --modal-bg-color: #fefefe;
+    --modal-header-color: #fefefe;
+    --modal-footer-color: #fefefe;
+    --drop-down-menu-bg: #fefefe;
+    --button-color: #6592b4;
+    --button-color-hover: #3f9b94;
+    --button-text: #212121;
+    --button-text-hover: #212121;
+    --accent-color: 101, 146, 180;
+    --accent-color-hover: rgb(var(--accent-color),.8);
+    --link-color: #177c77;
+    --link-color-hover: #a4538a;
+    --label-text-color: #212121;
+    --text: #0a0a0a;
+    --text-hover: #000000;
+    --text-muted: #343434;
+    --arr-queue-color: #7e8e50;
+    --plex-poster-unwatched: #b38535;
+    --petio-spinner: invert(39%) sepia(7%) saturate(2024%) hue-rotate(163deg) brightness(88%) contrast(88%);
+    --gitea-color-primary-dark-4: 101, 146, 180;
+    --overseerr-gradient: linear-gradient(180deg, rgba(243, 243, 243, 0.17) 0%, #f3f3f3 100%);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--main-bg-color);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    padding: 32px 24px 64px;
+  }
+  h1 { color: var(--text-hover); font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--text-muted); margin: 0 0 32px; font-size: 14px; }
+  h2 { color: var(--text-hover); font-size: 15px; text-transform: uppercase; letter-spacing: .06em; margin: 40px 0 14px; border-bottom: 1px solid var(--modal-bg-color); padding-bottom: 8px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .swatch { border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,.08); }
+  .swatch .chip { height: 56px; }
+  .swatch .label { background: var(--modal-bg-color); padding: 8px 10px; font-size: 12px; }
+  .swatch .label .name { display: block; color: var(--text-hover); font-weight: 600; }
+  .swatch .label .hex { display: block; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  button.pk {
+    background: var(--button-color); color: var(--button-text); border: none;
+    padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background .15s, color .15s;
+  }
+  button.pk:hover { background: var(--button-color-hover); color: var(--button-text-hover); }
+  a.pk { color: var(--link-color); text-decoration: none; font-weight: 600; }
+  a.pk:hover { color: var(--link-color-hover); }
+  .card { background: var(--modal-bg-color); border-radius: 10px; overflow: hidden; max-width: 420px; }
+  .card .hd { background: var(--modal-header-color); padding: 14px 18px; font-weight: 700; color: var(--text-hover); display: flex; justify-content: space-between; align-items: center; }
+  .card .bd { padding: 18px; font-size: 14px; line-height: 1.6; }
+  .card .ft { background: var(--modal-footer-color); padding: 12px 18px; display: flex; justify-content: flex-end; gap: 10px; }
+  .badge { background: var(--arr-queue-color); color: #0a1e00; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .dropdown { background: var(--drop-down-menu-bg); border-radius: 8px; padding: 6px; width: 200px; font-size: 14px; }
+  .dropdown .item { padding: 8px 10px; border-radius: 6px; color: var(--text); }
+  .dropdown .item:hover { background: rgba(var(--accent-color), .18); color: var(--text-hover); }
+  .poster { width: 90px; height: 130px; border-radius: 6px; background: linear-gradient(160deg, var(--plex-poster-unwatched), var(--modal-bg-color)); display: flex; align-items: flex-end; padding: 6px; font-size: 10px; color: var(--text-hover); }
+  .spinner { width: 28px; height: 28px; background: #000 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4a6 6 0 016 6h-2a4 4 0 00-4-4V6z"/></svg>') center/contain no-repeat; filter: var(--petio-spinner); }
+  .overseerr-band { height: 90px; background: var(--overseerr-gradient); border-radius: 10px; display: flex; align-items: flex-end; padding: 12px; color: var(--text-hover); font-size: 13px; max-width: 420px; }
+  .label-chip { display: inline-block; background: rgb(var(--accent-color)); color: var(--label-text-color); font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+</style>
+</head>
+<body>
+  <h1>Afterglow (light)</h1>
+  <p class="sub">theme.park custom theme preview — mock UI elements rendered with the CSS variables in afterglow-light.css, not a real app.</p>
+
+  <h2>Palette</h2>
+  <div class="swatches">
+    <div class="swatch"><div class="chip" style="background:#f3f3f3"></div><div class="label"><span class="name">main-bg-color</span><span class="hex">#f3f3f3</span></div></div>
+    <div class="swatch"><div class="chip" style="background:#fefefe"></div><div class="label"><span class="name">modal-bg-color</span><span class="hex">#fefefe</span></div></div>
+    <div class="swatch"><div class="chip" style="background:#6592b4"></div><div class="label"><span class="name">button-color</span><span class="hex">#6592b4</span></div></div>
+    <div class="swatch"><div class="chip" style="background:#3f9b94"></div><div class="label"><span class="name">button-color-hover</span><span class="hex">#3f9b94</span></div></div>
+    <div class="swatch"><div class="chip" style="background:#a4538a"></div><div class="label"><span class="name">link-color-hover</span><span class="hex">#a4538a</span></div></div>
+    <div class="swatch"><div class="chip" style="background:#7e8e50"></div><div class="label"><span class="name">arr-queue-color</span><span class="hex">#7e8e50</span></div></div>
+    <div class="swatch"><div class="chip" style="background:#0a0a0a"></div><div class="label"><span class="name">text</span><span class="hex">#0a0a0a</span></div></div>
+    <div class="swatch"><div class="chip" style="background:#343434"></div><div class="label"><span class="name">text-muted</span><span class="hex">#343434</span></div></div>
+  </div>
+
+  <h2>Buttons &amp; links</h2>
+  <div class="row">
+    <button class="pk">Save changes</button>
+    <a class="pk" href="#">A themed link</a>
+    <span class="label-chip">4K</span>
+    <div class="spinner" title="petio-spinner filter, applied to a black source icon"></div>
+  </div>
+
+  <h2>Modal / card</h2>
+  <div class="card">
+    <div class="hd">Series Settings <span class="badge">3 queued</span></div>
+    <div class="bd">
+      This mock card uses <code>--modal-bg-color</code>, <code>--modal-header-color</code> and <code>--modal-footer-color</code>, the same structure theme.park applies to Sonarr/Radarr/Overseerr modals.
+    </div>
+    <div class="ft">
+      <button class="pk" style="background:transparent;color:var(--text-muted)">Cancel</button>
+      <button class="pk">Confirm</button>
+    </div>
+  </div>
+
+  <h2>Dropdown</h2>
+  <div class="dropdown">
+    <div class="item">Library</div>
+    <div class="item">Settings</div>
+    <div class="item">Logout</div>
+  </div>
+
+  <h2>Plex poster (unwatched) &amp; Overseerr band</h2>
+  <div class="row">
+    <div class="poster">Unwatched</div>
+    <div class="overseerr-band">Requested — arriving soon</div>
+  </div>
+</body>
+</html>

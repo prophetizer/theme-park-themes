@@ -1,6 +1,6 @@
 # Theme Park Themes
 
-469 custom themes for [theme.park](https://theme-park.dev), plus 394
+492 custom themes for [theme.park](https://theme-park.dev), plus 417
 generated light/dark twins (theme.park's own themes included): every theme
 comes in both a light and a dark form. Each
 hand-made theme is a faithful port of a published colour scheme, such as
